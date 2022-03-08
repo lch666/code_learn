@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/test_singleton_demo.dir/singleton.cc.o  -o test_singleton_demo  -lpthread 

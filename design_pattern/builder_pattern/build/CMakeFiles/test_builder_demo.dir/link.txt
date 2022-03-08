@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/test_builder_demo.dir/builder.cc.o CMakeFiles/test_builder_demo.dir/computer.cc.o CMakeFiles/test_builder_demo.dir/director.cc.o CMakeFiles/test_builder_demo.dir/main.cc.o  -o test_builder_demo 

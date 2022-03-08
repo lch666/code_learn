@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/test_singleton_learn.dir/singleton_learn.cc.o  -o test_singleton_learn  -lpthread 

@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/d/code_learn/C++/design_pattern/observer_pattern/observer.cc
+observer.h
+/mnt/d/code_learn/C++/design_pattern/observer_pattern/observer.h
+iostream
+-
+string
+-
+
+/mnt/d/code_learn/C++/design_pattern/observer_pattern/observer.h
+string
+-
+list
+-
+

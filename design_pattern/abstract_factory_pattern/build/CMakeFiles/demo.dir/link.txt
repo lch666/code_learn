@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/demo.dir/demo.cc.o CMakeFiles/demo.dir/product.cc.o CMakeFiles/demo.dir/factory.cc.o  -o demo 

@@ -1,0 +1,5 @@
+/mnt/d/C++/design_pattern/sington_pattern/build/CMakeFiles/edit_cache.dir
+/mnt/d/C++/design_pattern/sington_pattern/build/CMakeFiles/rebuild_cache.dir
+/mnt/d/C++/design_pattern/sington_pattern/build/CMakeFiles/test_singleton_safe.dir
+/mnt/d/C++/design_pattern/sington_pattern/build/CMakeFiles/test_singleton_easy.dir
+/mnt/d/C++/design_pattern/sington_pattern/build/CMakeFiles/test_singleton_demo.dir

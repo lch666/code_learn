@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/d/C++/design_pattern/abstract_factory_pattern/demo.cc
+factory.h
+/mnt/d/C++/design_pattern/abstract_factory_pattern/factory.h
+iostream
+-
+
+/mnt/d/C++/design_pattern/abstract_factory_pattern/factory.h
+./product.h
+/mnt/d/C++/design_pattern/abstract_factory_pattern/product.h
+
+/mnt/d/C++/design_pattern/abstract_factory_pattern/product.h
+

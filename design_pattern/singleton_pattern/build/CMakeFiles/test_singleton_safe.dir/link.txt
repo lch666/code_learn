@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/test_singleton_safe.dir/singleton_safe.cc.o  -o test_singleton_safe  -lpthread 
