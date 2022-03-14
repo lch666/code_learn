@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/mnt/d/code_learn/code_learn/design_pattern/demo/demo.cc
+/mnt/d/code_learn/C++/design_pattern/demo/demo.cc
 demo.h
-/mnt/d/code_learn/code_learn/design_pattern/demo/demo.h
+/mnt/d/code_learn/C++/design_pattern/demo/demo.h
 iostream
 -
 
-/mnt/d/code_learn/code_learn/design_pattern/demo/demo.h
+/mnt/d/code_learn/C++/design_pattern/demo/demo.h
 

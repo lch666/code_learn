@@ -1,4 +1,4 @@
-# Install script for directory: /mnt/d/code_learn/code_learn/design_pattern/demo
+# Install script for directory: /mnt/d/code_learn/C++/design_pattern/demo
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/mnt/d/code_learn/code_learn/design_pattern/demo/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/mnt/d/code_learn/C++/design_pattern/demo/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

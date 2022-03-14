@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/mnt/d/code_learn/code_learn/design_pattern/demo/demo.cc" "/mnt/d/code_learn/code_learn/design_pattern/demo/build/CMakeFiles/demo.dir/demo.cc.o"
+  "/mnt/d/code_learn/C++/design_pattern/demo/demo.cc" "/mnt/d/code_learn/C++/design_pattern/demo/build/CMakeFiles/demo.dir/demo.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

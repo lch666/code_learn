@@ -6,5 +6,5 @@ CXX_FLAGS = -O3 -DNDEBUG
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/mnt/d/code_learn/code_learn/design_pattern/demo 
+CXX_INCLUDES = -I/mnt/d/code_learn/C++/design_pattern/demo 
 

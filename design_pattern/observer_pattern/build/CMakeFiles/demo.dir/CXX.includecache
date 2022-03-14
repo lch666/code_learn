@@ -7,14 +7,10 @@
 #IncludeRegexTransform: 
 
 /mnt/d/code_learn/C++/design_pattern/observer_pattern/demo.cc
-demo.h
-/mnt/d/code_learn/C++/design_pattern/observer_pattern/demo.h
 iostream
 -
 list
 -
 string
 -
-
-/mnt/d/code_learn/C++/design_pattern/observer_pattern/demo.h
 
