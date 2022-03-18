@@ -10,9 +10,9 @@
 # 37 "/usr/include/c++/9/iostream" 3
 
 # 1 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 1 3
-# 252 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
+# 256 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
 
-# 252 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
+# 256 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
 namespace std
 {
   typedef long unsigned int size_t;
@@ -22,7 +22,7 @@ namespace std
   typedef decltype(nullptr) nullptr_t;
 
 }
-# 274 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
+# 278 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
 namespace std
 {
   inline namespace __cxx11 __attribute__((__abi_tag__ ("cxx11"))) { }
@@ -31,7 +31,7 @@ namespace __gnu_cxx
 {
   inline namespace __cxx11 __attribute__((__abi_tag__ ("cxx11"))) { }
 }
-# 524 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
+# 528 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 3
 # 1 "/usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h" 1 3
 # 39 "/usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h" 3
 # 1 "/usr/include/features.h" 1 3 4
@@ -50,11 +50,11 @@ namespace __gnu_cxx
 # 11 "/usr/include/x86_64-linux-gnu/gnu/stubs.h" 2 3 4
 # 486 "/usr/include/features.h" 2 3 4
 # 40 "/usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h" 2 3
-# 525 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 2 3
+# 529 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 2 3
 
 
 # 1 "/usr/include/x86_64-linux-gnu/c++/9/bits/cpu_defines.h" 1 3
-# 528 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 2 3
+# 532 "/usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h" 2 3
 # 39 "/usr/include/c++/9/iostream" 2 3
 # 1 "/usr/include/c++/9/ostream" 1 3
 # 36 "/usr/include/c++/9/ostream" 3
@@ -1363,6 +1363,8 @@ namespace std
     virtual const char*
     what() const noexcept;
   };
+
+
 
 }
 
@@ -2772,55 +2774,48 @@ namespace std __attribute__ ((__visibility__ ("default")))
     : public __is_move_constructible_impl<_Tp>
     { };
 
-  template<typename _Tp>
-    struct __is_nt_default_constructible_atom
-    : public integral_constant<bool, noexcept(_Tp())>
+  template<bool, typename _Tp, typename... _Args>
+    struct __is_nt_constructible_impl
+    : public false_type
     { };
 
-  template<typename _Tp, bool = is_array<_Tp>::value>
-    struct __is_nt_default_constructible_impl;
+  template<typename _Tp, typename... _Args>
+    struct __is_nt_constructible_impl<true, _Tp, _Args...>
+    : public __bool_constant<noexcept(_Tp(std::declval<_Args>()...))>
+    { };
 
-  template<typename _Tp>
-    struct __is_nt_default_constructible_impl<_Tp, true>
-    : public __and_<__is_array_known_bounds<_Tp>,
-      __is_nt_default_constructible_atom<typename
-                      remove_all_extents<_Tp>::type>>
+  template<typename _Tp, typename _Arg>
+    struct __is_nt_constructible_impl<true, _Tp, _Arg>
+    : public __bool_constant<noexcept(static_cast<_Tp>(std::declval<_Arg>()))>
     { };
 
   template<typename _Tp>
-    struct __is_nt_default_constructible_impl<_Tp, false>
-    : public __is_nt_default_constructible_atom<_Tp>
+    struct __is_nt_constructible_impl<true, _Tp>
+    : public __bool_constant<noexcept(_Tp())>
+    { };
+
+  template<typename _Tp, size_t _Num>
+    struct __is_nt_constructible_impl<true, _Tp[_Num]>
+    : public __bool_constant<noexcept(typename remove_all_extents<_Tp>::type())>
+    { };
+
+  template<typename _Tp, typename... _Args>
+    using __is_nothrow_constructible_impl
+      = __is_nt_constructible_impl<__is_constructible(_Tp, _Args...),
+       _Tp, _Args...>;
+
+
+  template<typename _Tp, typename... _Args>
+    struct is_nothrow_constructible
+    : public __is_nothrow_constructible_impl<_Tp, _Args...>::type
     { };
 
 
   template<typename _Tp>
     struct is_nothrow_default_constructible
-    : public __and_<is_default_constructible<_Tp>,
-                    __is_nt_default_constructible_impl<_Tp>>
+    : public __is_nothrow_constructible_impl<_Tp>::type
     { };
 
-  template<typename _Tp, typename... _Args>
-    struct __is_nt_constructible_impl
-    : public integral_constant<bool, noexcept(_Tp(declval<_Args>()...))>
-    { };
-
-  template<typename _Tp, typename _Arg>
-    struct __is_nt_constructible_impl<_Tp, _Arg>
-    : public integral_constant<bool,
-                               noexcept(static_cast<_Tp>(declval<_Arg>()))>
-    { };
-
-  template<typename _Tp>
-    struct __is_nt_constructible_impl<_Tp>
-    : public is_nothrow_default_constructible<_Tp>
-    { };
-
-
-  template<typename _Tp, typename... _Args>
-    struct is_nothrow_constructible
-    : public __and_<is_constructible<_Tp, _Args...>,
-      __is_nt_constructible_impl<_Tp, _Args...>>
-    { };
 
   template<typename _Tp, bool = __is_referenceable<_Tp>::value>
     struct __is_nothrow_copy_constructible_impl;
@@ -3181,7 +3176,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     struct is_convertible
     : public __is_convertible_helper<_From, _To>::type
     { };
-# 1381 "/usr/include/c++/9/type_traits" 3
+# 1374 "/usr/include/c++/9/type_traits" 3
   template<typename _Tp>
     struct remove_const
     { typedef _Tp type; };
@@ -3377,7 +3372,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
   template<>
     struct __make_unsigned<__int128>
     { typedef unsigned __int128 __type; };
-# 1594 "/usr/include/c++/9/type_traits" 3
+# 1587 "/usr/include/c++/9/type_traits" 3
   template<typename _Tp,
     bool _IsInt = is_integral<_Tp>::value,
     bool _IsEnum = is_enum<_Tp>::value>
@@ -3443,7 +3438,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       using __type
  = typename __make_unsigned_selector<wchar_t, false, true>::__type;
     };
-# 1670 "/usr/include/c++/9/type_traits" 3
+# 1663 "/usr/include/c++/9/type_traits" 3
   template<>
     struct __make_unsigned<char16_t>
     {
@@ -3504,7 +3499,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
   template<>
     struct __make_signed<unsigned __int128>
     { typedef __int128 __type; };
-# 1748 "/usr/include/c++/9/type_traits" 3
+# 1741 "/usr/include/c++/9/type_traits" 3
   template<typename _Tp,
     bool _IsInt = is_integral<_Tp>::value,
     bool _IsEnum = is_enum<_Tp>::value>
@@ -3542,7 +3537,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       using __type
  = typename __make_signed_selector<wchar_t, false, true>::__type;
     };
-# 1796 "/usr/include/c++/9/type_traits" 3
+# 1789 "/usr/include/c++/9/type_traits" 3
   template<>
     struct __make_signed<char16_t>
     {
@@ -3667,7 +3662,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
  struct __attribute__((__aligned__)) { } __align;
       };
     };
-# 1931 "/usr/include/c++/9/type_traits" 3
+# 1924 "/usr/include/c++/9/type_traits" 3
   template<std::size_t _Len, std::size_t _Align =
     __alignof__(typename __aligned_storage_msa<_Len>::__type)>
     struct aligned_storage
@@ -3696,7 +3691,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
         sizeof(_Tp) > __strictest_alignment<_Types...>::_S_size
  ? sizeof(_Tp) : __strictest_alignment<_Types...>::_S_size;
     };
-# 1970 "/usr/include/c++/9/type_traits" 3
+# 1963 "/usr/include/c++/9/type_traits" 3
   template <size_t _Len, typename... _Types>
     struct aligned_union
     {
@@ -4172,7 +4167,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     typename... _Args>
     using __detected_or_t
       = typename __detected_or<_Default, _Op, _Args...>::type;
-# 2462 "/usr/include/c++/9/type_traits" 3
+# 2455 "/usr/include/c++/9/type_traits" 3
   template <typename _Tp>
     struct __is_swappable;
 
@@ -4483,7 +4478,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     __nonesuch(__nonesuch const&) = delete;
     void operator=(__nonesuch const&) = delete;
   };
-# 3103 "/usr/include/c++/9/type_traits" 3
+# 3096 "/usr/include/c++/9/type_traits" 3
 
 }
 # 56 "/usr/include/c++/9/bits/move.h" 2 3
@@ -5324,18 +5319,36 @@ namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
 namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
 {
 
-# 54 "/usr/include/c++/9/ext/numeric_traits.h" 3
+# 50 "/usr/include/c++/9/ext/numeric_traits.h" 3
+  template<typename _Tp>
+    struct __is_integer_nonstrict
+    : public std::__is_integer<_Tp>
+    {
+      using std::__is_integer<_Tp>::__value;
+
+
+      enum { __width = __value ? sizeof(_Tp) * 8 : 0 };
+    };
+
   template<typename _Value>
     struct __numeric_traits_integer
     {
 
-      static const _Value __min = (((_Value)(-1) < 0) ? (_Value)1 << (sizeof(_Value) * 8 - ((_Value)(-1) < 0)) : (_Value)0);
-      static const _Value __max = (((_Value)(-1) < 0) ? (((((_Value)1 << ((sizeof(_Value) * 8 - ((_Value)(-1) < 0)) - 1)) - 1) << 1) + 1) : ~(_Value)0);
+      static_assert(__is_integer_nonstrict<_Value>::__value,
+      "invalid specialization");
 
 
 
-      static const bool __is_signed = ((_Value)(-1) < 0);
-      static const int __digits = (sizeof(_Value) * 8 - ((_Value)(-1) < 0));
+
+      static const bool __is_signed = (_Value)(-1) < 0;
+      static const int __digits
+ = __is_integer_nonstrict<_Value>::__width - __is_signed;
+
+
+      static const _Value __max = __is_signed
+ ? (((((_Value)1 << (__digits - 1)) - 1) << 1) + 1)
+ : ~(_Value)0;
+      static const _Value __min = __is_signed ? -__max - 1 : (_Value)0;
     };
 
   template<typename _Value>
@@ -5349,7 +5362,10 @@ namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
 
   template<typename _Value>
     const int __numeric_traits_integer<_Value>::__digits;
-# 99 "/usr/include/c++/9/ext/numeric_traits.h" 3
+# 135 "/usr/include/c++/9/ext/numeric_traits.h" 3
+  template<typename _Tp>
+    using __int_traits = __numeric_traits_integer<_Tp>;
+# 155 "/usr/include/c++/9/ext/numeric_traits.h" 3
   template<typename _Value>
     struct __numeric_traits_floating
     {
@@ -6694,13 +6710,10 @@ namespace std __attribute__ ((__visibility__ ("default")))
       { return *this; }
     };
 # 760 "/usr/include/c++/9/bits/stl_iterator.h" 3
-  template<typename _Container, typename _Iterator>
+  template<typename _Container>
     inline insert_iterator<_Container>
-    inserter(_Container& __x, _Iterator __i)
-    {
-      return insert_iterator<_Container>(__x,
-      typename _Container::iterator(__i));
-    }
+    inserter(_Container& __x, typename _Container::iterator __i)
+    { return insert_iterator<_Container>(__x, __i); }
 
 
 
@@ -6710,7 +6723,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
 {
 
-# 784 "/usr/include/c++/9/bits/stl_iterator.h" 3
+# 781 "/usr/include/c++/9/bits/stl_iterator.h" 3
   using std::iterator_traits;
   using std::iterator;
   template<typename _Iterator, typename _Container>
@@ -6801,7 +6814,7 @@ namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
       base() const noexcept
       { return _M_current; }
     };
-# 884 "/usr/include/c++/9/bits/stl_iterator.h" 3
+# 881 "/usr/include/c++/9/bits/stl_iterator.h" 3
   template<typename _IteratorL, typename _IteratorR, typename _Container>
     inline bool
     operator==(const __normal_iterator<_IteratorL, _Container>& __lhs,
@@ -6931,7 +6944,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     __niter_base(__gnu_cxx::__normal_iterator<_Iterator, _Container> __it)
     noexcept(std::is_nothrow_copy_constructible<_Iterator>::value)
     { return __it.base(); }
-# 1030 "/usr/include/c++/9/bits/stl_iterator.h" 3
+# 1027 "/usr/include/c++/9/bits/stl_iterator.h" 3
   template<typename _Iterator>
     class move_iterator
     {
@@ -7167,7 +7180,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     __miter_base(move_iterator<_Iterator> __it)
     -> decltype(__miter_base(__it.base()))
     { return __miter_base(__it.base()); }
-# 1295 "/usr/include/c++/9/bits/stl_iterator.h" 3
+# 1292 "/usr/include/c++/9/bits/stl_iterator.h" 3
 
 }
 # 68 "/usr/include/c++/9/bits/stl_algobase.h" 2 3
@@ -8717,12 +8730,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       {
  if (__n == 0)
    return 0;
-
-
-
-
-
-
+# 332 "/usr/include/c++/9/bits/char_traits.h" 3
  return __builtin_memcmp(__s1, __s2, __n);
       }
 
@@ -8903,7 +8911,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       not_eof(const int_type& __c) noexcept
       { return eq_int_type(__c, eof()) ? 0 : __c; }
   };
-# 616 "/usr/include/c++/9/bits/char_traits.h" 3
+# 623 "/usr/include/c++/9/bits/char_traits.h" 3
 
 }
 
@@ -9159,7 +9167,7 @@ namespace std
 
 
 }
-# 622 "/usr/include/c++/9/bits/char_traits.h" 2 3
+# 629 "/usr/include/c++/9/bits/char_traits.h" 2 3
 
 namespace std __attribute__ ((__visibility__ ("default")))
 {
@@ -11813,16 +11821,15 @@ namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
       template<typename _Up, typename... _Args>
  void
  construct(_Up* __p, _Args&&... __args)
- noexcept(noexcept(::new((void *)__p)
-       _Up(std::forward<_Args>(__args)...)))
+ noexcept(std::is_nothrow_constructible<_Up, _Args...>::value)
  { ::new((void *)__p) _Up(std::forward<_Args>(__args)...); }
 
       template<typename _Up>
  void
  destroy(_Up* __p)
- noexcept(noexcept( __p->~_Up()))
+ noexcept(std::is_nothrow_destructible<_Up>::value)
  { __p->~_Up(); }
-# 165 "/usr/include/c++/9/ext/new_allocator.h" 3
+# 164 "/usr/include/c++/9/ext/new_allocator.h" 3
       template<typename _Up>
  friend bool
  operator==(const new_allocator&, const new_allocator<_Up>&)
@@ -11883,18 +11890,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
       template<typename _Up, typename... _Args>
  void
  construct(_Up* __p, _Args&&... __args)
- noexcept(noexcept(::new((void *)__p)
-       _Up(std::forward<_Args>(__args)...)))
+ noexcept(std::is_nothrow_constructible<_Up, _Args...>::value)
  { ::new((void *)__p) _Up(std::forward<_Args>(__args)...); }
 
       template<typename _Up>
  void
  destroy(_Up* __p)
- noexcept(noexcept(__p->~_Up()))
+ noexcept(std::is_nothrow_destructible<_Up>::value)
  { __p->~_Up(); }
 
     };
-# 111 "/usr/include/c++/9/bits/allocator.h" 3
+# 110 "/usr/include/c++/9/bits/allocator.h" 3
   template<typename _Tp>
     class allocator : public __allocator_base<_Tp>
     {
@@ -13603,7 +13609,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
   template<typename _Tp, size_t _Nm>
     inline constexpr _Tp*
-    begin(_Tp (&__arr)[_Nm])
+    begin(_Tp (&__arr)[_Nm]) noexcept
     { return __arr; }
 
 
@@ -13613,7 +13619,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
   template<typename _Tp, size_t _Nm>
     inline constexpr _Tp*
-    end(_Tp (&__arr)[_Nm])
+    end(_Tp (&__arr)[_Nm]) noexcept
     { return __arr + _Nm; }
 
 
@@ -13694,7 +13700,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
   template<typename _Tp, size_t _Nm>
     inline reverse_iterator<_Tp*>
-    rbegin(_Tp (&__arr)[_Nm])
+    rbegin(_Tp (&__arr)[_Nm]) noexcept
     { return reverse_iterator<_Tp*>(__arr + _Nm); }
 
 
@@ -13704,7 +13710,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
   template<typename _Tp, size_t _Nm>
     inline reverse_iterator<_Tp*>
-    rend(_Tp (&__arr)[_Nm])
+    rend(_Tp (&__arr)[_Nm]) noexcept
     { return reverse_iterator<_Tp*>(__arr); }
 
 
@@ -13714,7 +13720,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
   template<typename _Tp>
     inline reverse_iterator<const _Tp*>
-    rbegin(initializer_list<_Tp> __il)
+    rbegin(initializer_list<_Tp> __il) noexcept
     { return reverse_iterator<const _Tp*>(__il.end()); }
 
 
@@ -13724,7 +13730,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
   template<typename _Tp>
     inline reverse_iterator<const _Tp*>
-    rend(initializer_list<_Tp> __il)
+    rend(initializer_list<_Tp> __il) noexcept
     { return reverse_iterator<const _Tp*>(__il.begin()); }
 
 
@@ -13975,8 +13981,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
  _Require<__and_<__not_<__has_construct<_Tp, _Args...>>,
           is_constructible<_Tp, _Args...>>>
  _S_construct(_Alloc&, _Tp* __p, _Args&&... __args)
- noexcept(noexcept(::new((void*)__p)
-     _Tp(std::forward<_Args>(__args)...)))
+ noexcept(std::is_nothrow_constructible<_Tp, _Args...>::value)
  { ::new((void*)__p) _Tp(std::forward<_Args>(__args)...); }
 
       template<typename _Alloc2, typename _Tp>
@@ -13989,7 +13994,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       template<typename _Alloc2, typename _Tp>
  static void
  _S_destroy(_Alloc2&, _Tp* __p, ...)
- noexcept(noexcept(__p->~_Tp()))
+ noexcept(std::is_nothrow_destructible<_Tp>::value)
  { __p->~_Tp(); }
 
       template<typename _Alloc2>
@@ -14020,34 +14025,34 @@ namespace std __attribute__ ((__visibility__ ("default")))
  { return __a; }
 
     public:
-# 304 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 303 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static pointer
       allocate(_Alloc& __a, size_type __n)
       { return __a.allocate(__n); }
-# 319 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 318 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static pointer
       allocate(_Alloc& __a, size_type __n, const_void_pointer __hint)
       { return _S_allocate(__a, __n, __hint, 0); }
-# 331 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 330 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static void
       deallocate(_Alloc& __a, pointer __p, size_type __n)
       { __a.deallocate(__p, __n); }
-# 346 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 345 "/usr/include/c++/9/bits/alloc_traits.h" 3
       template<typename _Tp, typename... _Args>
  static auto construct(_Alloc& __a, _Tp* __p, _Args&&... __args)
  noexcept(noexcept(_S_construct(__a, __p,
            std::forward<_Args>(__args)...)))
  -> decltype(_S_construct(__a, __p, std::forward<_Args>(__args)...))
  { _S_construct(__a, __p, std::forward<_Args>(__args)...); }
-# 361 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 360 "/usr/include/c++/9/bits/alloc_traits.h" 3
       template<typename _Tp>
  static void destroy(_Alloc& __a, _Tp* __p)
  noexcept(noexcept(_S_destroy(__a, __p, 0)))
  { _S_destroy(__a, __p, 0); }
-# 374 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 373 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static size_type max_size(const _Alloc& __a) noexcept
       { return _S_max_size(__a, 0); }
-# 385 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 384 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static _Alloc
       select_on_container_copy_construction(const _Alloc& __rhs)
       { return _S_select(__rhs, 0); }
@@ -14097,25 +14102,25 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
       template<typename _Up>
  using rebind_traits = allocator_traits<allocator<_Up>>;
-# 442 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 441 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static pointer
       allocate(allocator_type& __a, size_type __n)
       { return __a.allocate(__n); }
-# 456 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 455 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static pointer
       allocate(allocator_type& __a, size_type __n, const_void_pointer __hint)
       { return __a.allocate(__n, __hint); }
-# 468 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 467 "/usr/include/c++/9/bits/alloc_traits.h" 3
       static void
       deallocate(allocator_type& __a, pointer __p, size_type __n)
       { __a.deallocate(__p, __n); }
-# 480 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 479 "/usr/include/c++/9/bits/alloc_traits.h" 3
       template<typename _Up, typename... _Args>
  static void
  construct(allocator_type& __a, _Up* __p, _Args&&... __args)
- noexcept(noexcept(__a.construct(__p, std::forward<_Args>(__args)...)))
+ noexcept(std::is_nothrow_constructible<_Up, _Args...>::value)
  { __a.construct(__p, std::forward<_Args>(__args)...); }
-# 493 "/usr/include/c++/9/bits/alloc_traits.h" 3
+# 492 "/usr/include/c++/9/bits/alloc_traits.h" 3
       template<typename _Up>
  static void
  destroy(allocator_type& __a, _Up* __p)
@@ -14357,14 +14362,19 @@ template<typename _Alloc, typename = typename _Alloc::value_type>
 
 }
 # 41 "/usr/include/c++/9/bits/basic_string.h" 2 3
-# 52 "/usr/include/c++/9/bits/basic_string.h" 3
+# 51 "/usr/include/c++/9/bits/basic_string.h" 3
 namespace std __attribute__ ((__visibility__ ("default")))
 {
 
 
 
+
+
+
+
+
 namespace __cxx11 {
-# 76 "/usr/include/c++/9/bits/basic_string.h" 3
+# 80 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     class basic_string
     {
@@ -14401,7 +14411,7 @@ namespace __cxx11 {
 
 
     private:
-# 150 "/usr/include/c++/9/bits/basic_string.h" 3
+# 154 "/usr/include/c++/9/bits/basic_string.h" 3
       struct _Alloc_hider : allocator_type
       {
 
@@ -14546,7 +14556,7 @@ namespace __cxx11 {
       { return _M_dataplus; }
 
     private:
-# 309 "/usr/include/c++/9/bits/basic_string.h" 3
+# 313 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       _M_check(size_type __pos, const char* __s) const
       {
@@ -14690,7 +14700,7 @@ namespace __cxx11 {
       : _M_dataplus(_M_local_data(),
       _Alloc_traits::_S_select_on_copy(__str._M_get_allocator()))
       { _M_construct(__str._M_data(), __str._M_data() + __str.length()); }
-# 461 "/usr/include/c++/9/bits/basic_string.h" 3
+# 465 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string(const basic_string& __str, size_type __pos,
      const _Alloc& __a = _Alloc())
       : _M_dataplus(_M_local_data(), __a)
@@ -14714,7 +14724,7 @@ namespace __cxx11 {
    + __str._M_check(__pos, "basic_string::basic_string");
  _M_construct(__start, __start + __str._M_limit(__pos, __n));
       }
-# 492 "/usr/include/c++/9/bits/basic_string.h" 3
+# 496 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string(const basic_string& __str, size_type __pos,
      size_type __n, const _Alloc& __a)
       : _M_dataplus(_M_local_data(), __a)
@@ -14723,20 +14733,20 @@ namespace __cxx11 {
    = __str._M_data() + __str._M_check(__pos, "string::string");
  _M_construct(__start, __start + __str._M_limit(__pos, __n));
       }
-# 510 "/usr/include/c++/9/bits/basic_string.h" 3
+# 514 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string(const _CharT* __s, size_type __n,
      const _Alloc& __a = _Alloc())
       : _M_dataplus(_M_local_data(), __a)
       { _M_construct(__s, __s + __n); }
-# 525 "/usr/include/c++/9/bits/basic_string.h" 3
+# 529 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string(const _CharT* __s, const _Alloc& __a = _Alloc())
       : _M_dataplus(_M_local_data(), __a)
       { _M_construct(__s, __s ? __s + traits_type::length(__s) : __s+npos); }
-# 540 "/usr/include/c++/9/bits/basic_string.h" 3
+# 544 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string(size_type __n, _CharT __c, const _Alloc& __a = _Alloc())
       : _M_dataplus(_M_local_data(), __a)
       { _M_construct(__n, __c); }
-# 552 "/usr/include/c++/9/bits/basic_string.h" 3
+# 556 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string(basic_string&& __str) noexcept
       : _M_dataplus(_M_local_data(), std::move(__str._M_get_allocator()))
       {
@@ -14795,7 +14805,7 @@ namespace __cxx11 {
  else
    _M_construct(__str.begin(), __str.end());
       }
-# 620 "/usr/include/c++/9/bits/basic_string.h" 3
+# 624 "/usr/include/c++/9/bits/basic_string.h" 3
       template<typename _InputIterator,
         typename = std::_RequireInputIter<_InputIterator>>
 
@@ -14805,7 +14815,7 @@ namespace __cxx11 {
        const _Alloc& __a = _Alloc())
  : _M_dataplus(_M_local_data(), __a)
  { _M_construct(__beg, __end); }
-# 657 "/usr/include/c++/9/bits/basic_string.h" 3
+# 661 "/usr/include/c++/9/bits/basic_string.h" 3
       ~basic_string()
       { _M_dispose(); }
 
@@ -14855,14 +14865,14 @@ namespace __cxx11 {
       basic_string&
       operator=(const _CharT* __s)
       { return this->assign(__s); }
-# 714 "/usr/include/c++/9/bits/basic_string.h" 3
+# 718 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       operator=(_CharT __c)
       {
  this->assign(1, __c);
  return *this;
       }
-# 731 "/usr/include/c++/9/bits/basic_string.h" 3
+# 735 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       operator=(basic_string&& __str)
       noexcept(_Alloc_traits::_S_nothrow_move())
@@ -14932,7 +14942,7 @@ namespace __cxx11 {
  this->assign(__l.begin(), __l.size());
  return *this;
       }
-# 825 "/usr/include/c++/9/bits/basic_string.h" 3
+# 829 "/usr/include/c++/9/bits/basic_string.h" 3
       iterator
       begin() noexcept
       { return iterator(_M_data()); }
@@ -15051,10 +15061,10 @@ namespace __cxx11 {
       size_type
       max_size() const noexcept
       { return (_Alloc_traits::max_size(_M_get_allocator()) - 1) / 2; }
-# 954 "/usr/include/c++/9/bits/basic_string.h" 3
+# 958 "/usr/include/c++/9/bits/basic_string.h" 3
       void
       resize(size_type __n, _CharT __c);
-# 967 "/usr/include/c++/9/bits/basic_string.h" 3
+# 971 "/usr/include/c++/9/bits/basic_string.h" 3
       void
       resize(size_type __n)
       { this->resize(__n, _CharT()); }
@@ -15086,7 +15096,7 @@ namespace __cxx11 {
  return _M_is_local() ? size_type(_S_local_capacity)
                       : _M_allocated_capacity;
       }
-# 1016 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1020 "/usr/include/c++/9/bits/basic_string.h" 3
       void
       reserve(size_type __res_arg = 0);
 
@@ -15104,14 +15114,14 @@ namespace __cxx11 {
       bool
       empty() const noexcept
       { return this->size() == 0; }
-# 1045 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1049 "/usr/include/c++/9/bits/basic_string.h" 3
       const_reference
       operator[] (size_type __pos) const noexcept
       {
  ;
  return _M_data()[__pos];
       }
-# 1062 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1066 "/usr/include/c++/9/bits/basic_string.h" 3
       reference
       operator[](size_type __pos)
       {
@@ -15122,7 +15132,7 @@ namespace __cxx11 {
  ;
  return _M_data()[__pos];
       }
-# 1083 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1087 "/usr/include/c++/9/bits/basic_string.h" 3
       const_reference
       at(size_type __n) const
       {
@@ -15133,7 +15143,7 @@ namespace __cxx11 {
        __n, this->size());
  return _M_data()[__n];
       }
-# 1104 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1108 "/usr/include/c++/9/bits/basic_string.h" 3
       reference
       at(size_type __n)
       {
@@ -15189,7 +15199,7 @@ namespace __cxx11 {
  ;
  return operator[](this->size() - 1);
       }
-# 1167 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1171 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       operator+=(const basic_string& __str)
       { return this->append(__str); }
@@ -15224,11 +15234,11 @@ namespace __cxx11 {
       basic_string&
       operator+=(initializer_list<_CharT> __l)
       { return this->append(__l.begin(), __l.size()); }
-# 1220 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1224 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       append(const basic_string& __str)
       { return _M_append(__str._M_data(), __str.size()); }
-# 1237 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1241 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       append(const basic_string& __str, size_type __pos, size_type __n = npos)
       { return _M_append(__str._M_data()
@@ -15262,7 +15272,7 @@ namespace __cxx11 {
  _M_check_length(size_type(0), __n, "basic_string::append");
  return _M_append(__s, __n);
       }
-# 1279 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1283 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       append(size_type __n, _CharT __c)
       { return _M_replace_aux(this->size(), size_type(0), __n, __c); }
@@ -15276,7 +15286,7 @@ namespace __cxx11 {
       basic_string&
       append(initializer_list<_CharT> __l)
       { return this->append(__l.begin(), __l.size()); }
-# 1303 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1307 "/usr/include/c++/9/bits/basic_string.h" 3
       template<class _InputIterator,
         typename = std::_RequireInputIter<_InputIterator>>
 
@@ -15285,7 +15295,7 @@ namespace __cxx11 {
         basic_string&
         append(_InputIterator __first, _InputIterator __last)
         { return this->replace(end(), end(), __first, __last); }
-# 1348 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1352 "/usr/include/c++/9/bits/basic_string.h" 3
       void
       push_back(_CharT __c)
       {
@@ -15307,7 +15317,7 @@ namespace __cxx11 {
  this->_M_assign(__str);
  return *this;
       }
-# 1379 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1383 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       assign(basic_string&& __str)
       noexcept(_Alloc_traits::_S_nothrow_move())
@@ -15316,20 +15326,20 @@ namespace __cxx11 {
 
  return *this = std::move(__str);
       }
-# 1402 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1406 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       assign(const basic_string& __str, size_type __pos, size_type __n = npos)
       { return _M_replace(size_type(0), this->size(), __str._M_data()
      + __str._M_check(__pos, "basic_string::assign"),
      __str._M_limit(__pos, __n)); }
-# 1418 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1422 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       assign(const _CharT* __s, size_type __n)
       {
  ;
  return _M_replace(size_type(0), this->size(), __s, __n);
       }
-# 1434 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1438 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       assign(const _CharT* __s)
       {
@@ -15337,11 +15347,11 @@ namespace __cxx11 {
  return _M_replace(size_type(0), this->size(), __s,
      traits_type::length(__s));
       }
-# 1451 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1455 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       assign(size_type __n, _CharT __c)
       { return _M_replace_aux(size_type(0), this->size(), __n, __c); }
-# 1464 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1468 "/usr/include/c++/9/bits/basic_string.h" 3
       template<class _InputIterator,
         typename = std::_RequireInputIter<_InputIterator>>
 
@@ -15360,7 +15370,7 @@ namespace __cxx11 {
       basic_string&
       assign(initializer_list<_CharT> __l)
       { return this->assign(__l.begin(), __l.size()); }
-# 1533 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1537 "/usr/include/c++/9/bits/basic_string.h" 3
       iterator
       insert(const_iterator __p, size_type __n, _CharT __c)
       {
@@ -15369,7 +15379,7 @@ namespace __cxx11 {
  this->replace(__p, __p, __n, __c);
  return iterator(this->_M_data() + __pos);
       }
-# 1575 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1579 "/usr/include/c++/9/bits/basic_string.h" 3
       template<class _InputIterator,
         typename = std::_RequireInputIter<_InputIterator>>
  iterator
@@ -15380,27 +15390,27 @@ namespace __cxx11 {
    this->replace(__p, __p, __beg, __end);
    return iterator(this->_M_data() + __pos);
  }
-# 1611 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1615 "/usr/include/c++/9/bits/basic_string.h" 3
       iterator
       insert(const_iterator __p, initializer_list<_CharT> __l)
       { return this->insert(__p, __l.begin(), __l.end()); }
-# 1638 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1642 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       insert(size_type __pos1, const basic_string& __str)
       { return this->replace(__pos1, size_type(0),
         __str._M_data(), __str.size()); }
-# 1661 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1665 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       insert(size_type __pos1, const basic_string& __str,
       size_type __pos2, size_type __n = npos)
       { return this->replace(__pos1, size_type(0), __str._M_data()
         + __str._M_check(__pos2, "basic_string::insert"),
         __str._M_limit(__pos2, __n)); }
-# 1684 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1688 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       insert(size_type __pos, const _CharT* __s, size_type __n)
       { return this->replace(__pos, size_type(0), __s, __n); }
-# 1703 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1707 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       insert(size_type __pos, const _CharT* __s)
       {
@@ -15408,12 +15418,12 @@ namespace __cxx11 {
  return this->replace(__pos, size_type(0), __s,
         traits_type::length(__s));
       }
-# 1727 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1731 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       insert(size_type __pos, size_type __n, _CharT __c)
       { return _M_replace_aux(_M_check(__pos, "basic_string::insert"),
          size_type(0), __n, __c); }
-# 1745 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1749 "/usr/include/c++/9/bits/basic_string.h" 3
       iterator
       insert(__const_iterator __p, _CharT __c)
       {
@@ -15422,7 +15432,7 @@ namespace __cxx11 {
  _M_replace_aux(__pos, size_type(0), size_type(1), __c);
  return iterator(_M_data() + __pos);
       }
-# 1806 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1810 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       erase(size_type __pos = 0, size_type __n = npos)
       {
@@ -15433,7 +15443,7 @@ namespace __cxx11 {
    this->_M_erase(__pos, _M_limit(__pos, __n));
  return *this;
       }
-# 1825 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1829 "/usr/include/c++/9/bits/basic_string.h" 3
       iterator
       erase(__const_iterator __position)
       {
@@ -15443,7 +15453,7 @@ namespace __cxx11 {
  this->_M_erase(__pos, size_type(1));
  return iterator(_M_data() + __pos);
       }
-# 1844 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1848 "/usr/include/c++/9/bits/basic_string.h" 3
       iterator
       erase(__const_iterator __first, __const_iterator __last)
       {
@@ -15469,18 +15479,18 @@ namespace __cxx11 {
  ;
  _M_erase(size() - 1, 1);
       }
-# 1888 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1892 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(size_type __pos, size_type __n, const basic_string& __str)
       { return this->replace(__pos, __n, __str._M_data(), __str.size()); }
-# 1910 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1914 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(size_type __pos1, size_type __n1, const basic_string& __str,
        size_type __pos2, size_type __n2 = npos)
       { return this->replace(__pos1, __n1, __str._M_data()
         + __str._M_check(__pos2, "basic_string::replace"),
         __str._M_limit(__pos2, __n2)); }
-# 1935 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1939 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(size_type __pos, size_type __n1, const _CharT* __s,
        size_type __n2)
@@ -15489,24 +15499,24 @@ namespace __cxx11 {
  return _M_replace(_M_check(__pos, "basic_string::replace"),
      _M_limit(__pos, __n1), __s, __n2);
       }
-# 1960 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1964 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(size_type __pos, size_type __n1, const _CharT* __s)
       {
  ;
  return this->replace(__pos, __n1, __s, traits_type::length(__s));
       }
-# 1984 "/usr/include/c++/9/bits/basic_string.h" 3
+# 1988 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(size_type __pos, size_type __n1, size_type __n2, _CharT __c)
       { return _M_replace_aux(_M_check(__pos, "basic_string::replace"),
          _M_limit(__pos, __n1), __n2, __c); }
-# 2002 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2006 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(__const_iterator __i1, __const_iterator __i2,
        const basic_string& __str)
       { return this->replace(__i1, __i2, __str._M_data(), __str.size()); }
-# 2022 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2026 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(__const_iterator __i1, __const_iterator __i2,
        const _CharT* __s, size_type __n)
@@ -15515,14 +15525,14 @@ namespace __cxx11 {
                       ;
  return this->replace(__i1 - begin(), __i2 - __i1, __s, __n);
       }
-# 2044 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2048 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(__const_iterator __i1, __const_iterator __i2, const _CharT* __s)
       {
  ;
  return this->replace(__i1, __i2, __s, traits_type::length(__s));
       }
-# 2065 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2069 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(__const_iterator __i1, __const_iterator __i2, size_type __n,
        _CharT __c)
@@ -15531,7 +15541,7 @@ namespace __cxx11 {
                       ;
  return _M_replace_aux(__i1 - begin(), __i2 - __i1, __n, __c);
       }
-# 2090 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2094 "/usr/include/c++/9/bits/basic_string.h" 3
       template<class _InputIterator,
         typename = std::_RequireInputIter<_InputIterator>>
         basic_string&
@@ -15544,7 +15554,7 @@ namespace __cxx11 {
    return this->_M_replace_dispatch(__i1, __i2, __k1, __k2,
         std::__false_type());
  }
-# 2122 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2126 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string&
       replace(__const_iterator __i1, __const_iterator __i2,
        _CharT* __k1, _CharT* __k2)
@@ -15588,11 +15598,11 @@ namespace __cxx11 {
  return this->replace(__i1 - begin(), __i2 - __i1,
         __k1.base(), __k2 - __k1);
       }
-# 2181 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2185 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string& replace(const_iterator __i1, const_iterator __i2,
        initializer_list<_CharT> __l)
       { return this->replace(__i1, __i2, __l.begin(), __l.size()); }
-# 2241 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2245 "/usr/include/c++/9/bits/basic_string.h" 3
     private:
       template<class _Integer>
  basic_string&
@@ -15618,72 +15628,72 @@ namespace __cxx11 {
       _M_append(const _CharT* __s, size_type __n);
 
     public:
-# 2279 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2283 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       copy(_CharT* __s, size_type __n, size_type __pos = 0) const;
-# 2289 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2293 "/usr/include/c++/9/bits/basic_string.h" 3
       void
       swap(basic_string& __s) noexcept;
-# 2299 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2303 "/usr/include/c++/9/bits/basic_string.h" 3
       const _CharT*
       c_str() const noexcept
       { return _M_data(); }
-# 2311 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2315 "/usr/include/c++/9/bits/basic_string.h" 3
       const _CharT*
       data() const noexcept
       { return _M_data(); }
-# 2330 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2334 "/usr/include/c++/9/bits/basic_string.h" 3
       allocator_type
       get_allocator() const noexcept
       { return _M_get_allocator(); }
-# 2346 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2350 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find(const _CharT* __s, size_type __pos, size_type __n) const
       noexcept;
-# 2360 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2364 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find(const basic_string& __str, size_type __pos = 0) const
       noexcept
       { return this->find(__str.data(), __pos, __str.size()); }
-# 2392 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2396 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find(const _CharT* __s, size_type __pos = 0) const noexcept
       {
  ;
  return this->find(__s, __pos, traits_type::length(__s));
       }
-# 2409 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2413 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find(_CharT __c, size_type __pos = 0) const noexcept;
-# 2422 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2426 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       rfind(const basic_string& __str, size_type __pos = npos) const
       noexcept
       { return this->rfind(__str.data(), __pos, __str.size()); }
-# 2456 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2460 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       rfind(const _CharT* __s, size_type __pos, size_type __n) const
       noexcept;
-# 2470 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2474 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       rfind(const _CharT* __s, size_type __pos = npos) const
       {
  ;
  return this->rfind(__s, __pos, traits_type::length(__s));
       }
-# 2487 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2491 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       rfind(_CharT __c, size_type __pos = npos) const noexcept;
-# 2501 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2505 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_of(const basic_string& __str, size_type __pos = 0) const
       noexcept
       { return this->find_first_of(__str.data(), __pos, __str.size()); }
-# 2536 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2540 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_of(const _CharT* __s, size_type __pos, size_type __n) const
       noexcept;
-# 2550 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2554 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_of(const _CharT* __s, size_type __pos = 0) const
       noexcept
@@ -15691,20 +15701,20 @@ namespace __cxx11 {
  ;
  return this->find_first_of(__s, __pos, traits_type::length(__s));
       }
-# 2570 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2574 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_of(_CharT __c, size_type __pos = 0) const noexcept
       { return this->find(__c, __pos); }
-# 2585 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2589 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_of(const basic_string& __str, size_type __pos = npos) const
       noexcept
       { return this->find_last_of(__str.data(), __pos, __str.size()); }
-# 2620 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2624 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_of(const _CharT* __s, size_type __pos, size_type __n) const
       noexcept;
-# 2634 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2638 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_of(const _CharT* __s, size_type __pos = npos) const
       noexcept
@@ -15712,20 +15722,20 @@ namespace __cxx11 {
  ;
  return this->find_last_of(__s, __pos, traits_type::length(__s));
       }
-# 2654 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2658 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_of(_CharT __c, size_type __pos = npos) const noexcept
       { return this->rfind(__c, __pos); }
-# 2668 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2672 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_not_of(const basic_string& __str, size_type __pos = 0) const
       noexcept
       { return this->find_first_not_of(__str.data(), __pos, __str.size()); }
-# 2703 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2707 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_not_of(const _CharT* __s, size_type __pos,
    size_type __n) const noexcept;
-# 2717 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2721 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_not_of(const _CharT* __s, size_type __pos = 0) const
       noexcept
@@ -15733,20 +15743,20 @@ namespace __cxx11 {
  ;
  return this->find_first_not_of(__s, __pos, traits_type::length(__s));
       }
-# 2735 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2739 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_first_not_of(_CharT __c, size_type __pos = 0) const
       noexcept;
-# 2750 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2754 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_not_of(const basic_string& __str, size_type __pos = npos) const
       noexcept
       { return this->find_last_not_of(__str.data(), __pos, __str.size()); }
-# 2785 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2789 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_not_of(const _CharT* __s, size_type __pos,
          size_type __n) const noexcept;
-# 2799 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2803 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_not_of(const _CharT* __s, size_type __pos = npos) const
       noexcept
@@ -15754,16 +15764,16 @@ namespace __cxx11 {
  ;
  return this->find_last_not_of(__s, __pos, traits_type::length(__s));
       }
-# 2817 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2821 "/usr/include/c++/9/bits/basic_string.h" 3
       size_type
       find_last_not_of(_CharT __c, size_type __pos = npos) const
       noexcept;
-# 2833 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2837 "/usr/include/c++/9/bits/basic_string.h" 3
       basic_string
       substr(size_type __pos = 0, size_type __n = npos) const
       { return basic_string(*this,
        _M_check(__pos, "basic_string::substr"), __n); }
-# 2852 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2856 "/usr/include/c++/9/bits/basic_string.h" 3
       int
       compare(const basic_string& __str) const
       {
@@ -15776,28 +15786,28 @@ namespace __cxx11 {
    __r = _S_compare(__size, __osize);
  return __r;
       }
-# 2945 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2949 "/usr/include/c++/9/bits/basic_string.h" 3
       int
       compare(size_type __pos, size_type __n, const basic_string& __str) const;
-# 2971 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2975 "/usr/include/c++/9/bits/basic_string.h" 3
       int
       compare(size_type __pos1, size_type __n1, const basic_string& __str,
        size_type __pos2, size_type __n2 = npos) const;
-# 2989 "/usr/include/c++/9/bits/basic_string.h" 3
+# 2993 "/usr/include/c++/9/bits/basic_string.h" 3
       int
       compare(const _CharT* __s) const noexcept;
-# 3013 "/usr/include/c++/9/bits/basic_string.h" 3
+# 3017 "/usr/include/c++/9/bits/basic_string.h" 3
       int
       compare(size_type __pos, size_type __n1, const _CharT* __s) const;
-# 3040 "/usr/include/c++/9/bits/basic_string.h" 3
+# 3044 "/usr/include/c++/9/bits/basic_string.h" 3
       int
       compare(size_type __pos, size_type __n1, const _CharT* __s,
        size_type __n2) const;
-# 3071 "/usr/include/c++/9/bits/basic_string.h" 3
+# 3075 "/usr/include/c++/9/bits/basic_string.h" 3
       template<typename, typename, typename> friend class basic_stringbuf;
     };
 }
-# 6018 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6021 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     basic_string<_CharT, _Traits, _Alloc>
     operator+(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -15910,7 +15920,7 @@ namespace __cxx11 {
     operator+(basic_string<_CharT, _Traits, _Alloc>&& __lhs,
        _CharT __rhs)
     { return std::move(__lhs.append(1, __rhs)); }
-# 6139 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6142 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline bool
     operator==(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -15950,7 +15960,7 @@ namespace __cxx11 {
     operator==(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
         const _CharT* __rhs)
     { return __lhs.compare(__rhs) == 0; }
-# 6186 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6189 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline bool
     operator!=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -15981,7 +15991,7 @@ namespace __cxx11 {
     operator!=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
         const _CharT* __rhs)
     { return !(__lhs == __rhs); }
-# 6224 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6227 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline bool
     operator<(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -16012,7 +16022,7 @@ namespace __cxx11 {
     operator<(const _CharT* __lhs,
        const basic_string<_CharT, _Traits, _Alloc>& __rhs)
     { return __rhs.compare(__lhs) > 0; }
-# 6262 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6265 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline bool
     operator>(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -16043,7 +16053,7 @@ namespace __cxx11 {
     operator>(const _CharT* __lhs,
        const basic_string<_CharT, _Traits, _Alloc>& __rhs)
     { return __rhs.compare(__lhs) < 0; }
-# 6300 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6303 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline bool
     operator<=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -16074,7 +16084,7 @@ namespace __cxx11 {
     operator<=(const _CharT* __lhs,
         const basic_string<_CharT, _Traits, _Alloc>& __rhs)
     { return __rhs.compare(__lhs) >= 0; }
-# 6338 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6341 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline bool
     operator>=(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
@@ -16105,14 +16115,14 @@ namespace __cxx11 {
     operator>=(const _CharT* __lhs,
       const basic_string<_CharT, _Traits, _Alloc>& __rhs)
     { return __rhs.compare(__lhs) <= 0; }
-# 6376 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6379 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline void
     swap(basic_string<_CharT, _Traits, _Alloc>& __lhs,
   basic_string<_CharT, _Traits, _Alloc>& __rhs)
     noexcept(noexcept(__lhs.swap(__rhs)))
     { __lhs.swap(__rhs); }
-# 6396 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6399 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     basic_istream<_CharT, _Traits>&
     operator>>(basic_istream<_CharT, _Traits>& __is,
@@ -16121,7 +16131,7 @@ namespace __cxx11 {
   template<>
     basic_istream<char>&
     operator>>(basic_istream<char>& __is, basic_string<char>& __str);
-# 6414 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6417 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline basic_ostream<_CharT, _Traits>&
     operator<<(basic_ostream<_CharT, _Traits>& __os,
@@ -16131,12 +16141,12 @@ namespace __cxx11 {
 
       return __ostream_insert(__os, __str.data(), __str.size());
     }
-# 6437 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6440 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     basic_istream<_CharT, _Traits>&
     getline(basic_istream<_CharT, _Traits>& __is,
      basic_string<_CharT, _Traits, _Alloc>& __str, _CharT __delim);
-# 6454 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6457 "/usr/include/c++/9/bits/basic_string.h" 3
   template<typename _CharT, typename _Traits, typename _Alloc>
     inline basic_istream<_CharT, _Traits>&
     getline(basic_istream<_CharT, _Traits>& __is,
@@ -18286,7 +18296,7 @@ namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
 
 
 }
-# 6494 "/usr/include/c++/9/bits/basic_string.h" 2 3
+# 6497 "/usr/include/c++/9/bits/basic_string.h" 2 3
 
 namespace std __attribute__ ((__visibility__ ("default")))
 {
@@ -18720,7 +18730,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
 }
-# 6720 "/usr/include/c++/9/bits/basic_string.h" 2 3
+# 6723 "/usr/include/c++/9/bits/basic_string.h" 2 3
 
 namespace std __attribute__ ((__visibility__ ("default")))
 {
@@ -18758,7 +18768,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
   template<>
     struct __is_fast_hash<hash<wstring>> : std::false_type
     { };
-# 6778 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6781 "/usr/include/c++/9/bits/basic_string.h" 3
   template<>
     struct hash<u16string>
     : public __hash_base<size_t, u16string>
@@ -18808,7 +18818,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     inline basic_string<wchar_t>
     operator""s(const wchar_t* __str, size_t __len)
     { return basic_string<wchar_t>{__str, __len}; }
-# 6836 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6839 "/usr/include/c++/9/bits/basic_string.h" 3
     __attribute ((__abi_tag__ ("cxx11")))
     inline basic_string<char16_t>
     operator""s(const char16_t* __str, size_t __len)
@@ -18822,7 +18832,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 #pragma GCC diagnostic pop
   }
   }
-# 6868 "/usr/include/c++/9/bits/basic_string.h" 3
+# 6871 "/usr/include/c++/9/bits/basic_string.h" 3
 
 }
 # 56 "/usr/include/c++/9/string" 2 3
@@ -21562,22 +21572,27 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
 
-    typedef int io_state;
-    typedef int open_mode;
-    typedef int seek_dir;
+    typedef int io_state
+      __attribute__ ((__deprecated__ ("use '" "std::iostate" "' instead")));
+    typedef int open_mode
+      __attribute__ ((__deprecated__ ("use '" "std::openmode" "' instead")));
+    typedef int seek_dir
+      __attribute__ ((__deprecated__ ("use '" "std::seekdir" "' instead")));
 
-    typedef std::streampos streampos;
-    typedef std::streamoff streamoff;
-# 489 "/usr/include/c++/9/bits/ios_base.h" 3
+    typedef std::streampos streampos
+      __attribute__ ((__deprecated__ ("use '" "std::streampos" "' instead")));
+    typedef std::streamoff streamoff
+      __attribute__ ((__deprecated__ ("use '" "std::streamoff" "' instead")));
+# 494 "/usr/include/c++/9/bits/ios_base.h" 3
     enum event
     {
       erase_event,
       imbue_event,
       copyfmt_event
     };
-# 506 "/usr/include/c++/9/bits/ios_base.h" 3
+# 511 "/usr/include/c++/9/bits/ios_base.h" 3
     typedef void (*event_callback) (event __e, ios_base& __b, int __i);
-# 518 "/usr/include/c++/9/bits/ios_base.h" 3
+# 523 "/usr/include/c++/9/bits/ios_base.h" 3
     void
     register_callback(event_callback __fn, int __index);
 
@@ -21688,7 +21703,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     fmtflags
     flags() const
     { return _M_flags; }
-# 636 "/usr/include/c++/9/bits/ios_base.h" 3
+# 641 "/usr/include/c++/9/bits/ios_base.h" 3
     fmtflags
     flags(fmtflags __fmtfl)
     {
@@ -21696,7 +21711,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       _M_flags = __fmtfl;
       return __old;
     }
-# 652 "/usr/include/c++/9/bits/ios_base.h" 3
+# 657 "/usr/include/c++/9/bits/ios_base.h" 3
     fmtflags
     setf(fmtflags __fmtfl)
     {
@@ -21704,7 +21719,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
       _M_flags |= __fmtfl;
       return __old;
     }
-# 669 "/usr/include/c++/9/bits/ios_base.h" 3
+# 674 "/usr/include/c++/9/bits/ios_base.h" 3
     fmtflags
     setf(fmtflags __fmtfl, fmtflags __mask)
     {
@@ -21723,7 +21738,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
     void
     unsetf(fmtflags __mask)
     { _M_flags &= ~__mask; }
-# 695 "/usr/include/c++/9/bits/ios_base.h" 3
+# 700 "/usr/include/c++/9/bits/ios_base.h" 3
     streamsize
     precision() const
     { return _M_precision; }
@@ -21763,24 +21778,24 @@ namespace std __attribute__ ((__visibility__ ("default")))
       _M_width = __wide;
       return __old;
     }
-# 746 "/usr/include/c++/9/bits/ios_base.h" 3
+# 751 "/usr/include/c++/9/bits/ios_base.h" 3
     static bool
     sync_with_stdio(bool __sync = true);
-# 758 "/usr/include/c++/9/bits/ios_base.h" 3
+# 763 "/usr/include/c++/9/bits/ios_base.h" 3
     locale
     imbue(const locale& __loc) throw();
-# 769 "/usr/include/c++/9/bits/ios_base.h" 3
+# 774 "/usr/include/c++/9/bits/ios_base.h" 3
     locale
     getloc() const
     { return _M_ios_locale; }
-# 780 "/usr/include/c++/9/bits/ios_base.h" 3
+# 785 "/usr/include/c++/9/bits/ios_base.h" 3
     const locale&
     _M_getloc() const
     { return _M_ios_locale; }
-# 799 "/usr/include/c++/9/bits/ios_base.h" 3
+# 804 "/usr/include/c++/9/bits/ios_base.h" 3
     static int
     xalloc() throw();
-# 815 "/usr/include/c++/9/bits/ios_base.h" 3
+# 820 "/usr/include/c++/9/bits/ios_base.h" 3
     long&
     iword(int __ix)
     {
@@ -21788,7 +21803,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
    ? _M_word[__ix] : _M_grow_words(__ix, true);
       return __word._M_iword;
     }
-# 836 "/usr/include/c++/9/bits/ios_base.h" 3
+# 841 "/usr/include/c++/9/bits/ios_base.h" 3
     void*&
     pword(int __ix)
     {
@@ -21796,12 +21811,12 @@ namespace std __attribute__ ((__visibility__ ("default")))
    ? _M_word[__ix] : _M_grow_words(__ix, false);
       return __word._M_pword;
     }
-# 853 "/usr/include/c++/9/bits/ios_base.h" 3
+# 858 "/usr/include/c++/9/bits/ios_base.h" 3
     virtual ~ios_base();
 
   protected:
     ios_base() throw ();
-# 867 "/usr/include/c++/9/bits/ios_base.h" 3
+# 872 "/usr/include/c++/9/bits/ios_base.h" 3
   public:
     ios_base(const ios_base&) = delete;
 
@@ -22357,9 +22372,8 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
     public:
-# 790 "/usr/include/c++/9/streambuf" 3
-      [[__deprecated__("stossc is deprecated, use sbumpc instead")]]
-
+# 789 "/usr/include/c++/9/streambuf" 3
+      __attribute__ ((__deprecated__ ("use '" "std::basic_streambuf::sbumpc" "' instead")))
       void
       stossc()
       {
@@ -22570,7 +22584,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
 }
-# 863 "/usr/include/c++/9/streambuf" 2 3
+# 861 "/usr/include/c++/9/streambuf" 2 3
 # 44 "/usr/include/c++/9/ios" 2 3
 # 1 "/usr/include/c++/9/bits/basic_ios.h" 1 3
 # 33 "/usr/include/c++/9/bits/basic_ios.h" 3
@@ -28623,10 +28637,11 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
 
+  
+# 5 "demo.cc"
+ printf("hello cpp\n");
 
 
-
-# 7 "demo.cc"
 int main() {
   std::cout << "hello lch !" << std::endl;
   std::cout << "end lch ! " << std::endl;
