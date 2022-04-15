@@ -22,12 +22,12 @@ std::string CarBase::GetCarBaseName() {
 int main() {
   std::cout << "hello lch!" << std::endl;
 
-  CarBase *car1 = new CarBase();
+  CarBase *car1 = new CarBase(); // 指针、堆空间、需要delete
   car1->SetCarBaseName("baoma");
   std::cout << car1->GetCarBaseName() << std::endl;
 
   CarBase car2;
-  car2.SetCarBaseName("benchi");
+  car2.SetCarBaseName("benchi"); // 局部变量、栈空间、不需要delete，作用域内释放
   std::cout << car2.GetCarBaseName() << std::endl;
 
   std::shared_ptr<CarBase> car3 = std::make_shared<CarBase>();
