@@ -7,10 +7,17 @@
 
 #include <iostream>
 #include <vector>
-#include "./quick_sort/quick_sort.h"
+#include "./sort/quick_sort.h"
+#include "./sort/merge_sort.h"
+
+#ifdef LCH_TEST
+  int lch_max(int a, int b) {
+    return a > b ? a : b;
+  }
+#endif
 
 void Print(const std::vector<int>& vec) {
-  for(auto &it : vec) {
+  for(const auto &it : vec) {
     std::cout << it << " ";
   }
   std::cout << std::endl;
@@ -31,18 +38,38 @@ void Test1() {
 }
 
 void Test2() {
-  std::cout << "------------- start test  sort -------------" << std::endl;
-
-  std::cout << "------------- end test  sort -------------" << std::endl;
+  std::cout << "------------- start test merge sort -------------" << std::endl;
+  std::vector<int> vec(10);
+  for (int i = 0; i < 10; i++) {
+    vec[i] = std::rand() % 100;
+  }
+  std::cout << "before merge sort vec is " << std::endl;
+  Print(vec);
+  lch::MergeSort::Sort(vec, 0, vec.size() - 1);
+  std::cout << "after merge sort vec is " << std::endl;
+  Print(vec);
+  std::cout << "------------- end test merge sort -------------" << std::endl;
 }
 
-#define LCH_TEST
+void Test3() {
+  std::cout << "------------- start test  -------------" << std::endl;
+  std::cout << "lch::QuickSort::a is " << lch::QuickSort::a << std::endl;
+  std::cout << "lch::MergeSort::a is " << lch::MergeSort::a << std::endl;
+  std::cout << "test extern b is ";
+  lch::TestExtern();
+  std::cout << "------------- end test  -------------" << std::endl;
+}
 
 int main () {
   std::cout << "hello lch !" << std::endl;
 
-  (void) Test1();
-  (void) Test2();
+  #ifdef LCH_TEST
+  std::cout << lch_max(10, 20) << std::endl;
+  #endif
+
+  (void)Test1();
+  (void)Test2();
+  (void)Test3();
   
   std::cout << "end lch !" << std::endl;
   return 0;

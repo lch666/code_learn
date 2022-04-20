@@ -11,5 +11,6 @@ namespace lch {
   class QuickSort {
     public:
       static void Sort(std::vector<int>& vec, int l, int r);
+      static const int a = 100;
   };
 }

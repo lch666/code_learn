@@ -6,7 +6,7 @@
  */
 #include "./quick_sort.h"
 #include <iostream>
-
+int b = 200;
 namespace lch {
   void QuickSort::Sort(std::vector<int>& vec, int left, int right) {
     if (left >= right) return;
