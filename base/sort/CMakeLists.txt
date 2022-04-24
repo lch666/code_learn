@@ -13,4 +13,4 @@ add_subdirectory(sort)
 set(SRC_FILE  ${PROJECT_SOURCE_DIR}/test_sort.cc)
 
 add_executable(test_sort ${SRC_FILE})
-target_link_libraries(test_sort quicksort)
+target_link_libraries(test_sort shared_sort)

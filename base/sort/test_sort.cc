@@ -9,6 +9,7 @@
 #include <vector>
 #include "./sort/quick_sort.h"
 #include "./sort/merge_sort.h"
+#include "./sort/heap_sort.h"
 
 #ifdef LCH_TEST
   int lch_max(int a, int b) {
@@ -23,7 +24,7 @@ void Print(const std::vector<int>& vec) {
   std::cout << std::endl;
 }
 
-void Test1() {
+void Test_QuickSort() {
   std::cout << "------------- start test quick sort -------------" << std::endl;
   std::vector<int> vec(10);
   for (int i = 0; i < 10; i++) {
@@ -37,7 +38,7 @@ void Test1() {
   std::cout << "------------- end test quick sort -------------" << std::endl;
 }
 
-void Test2() {
+void Test_MergeSort() {
   std::cout << "------------- start test merge sort -------------" << std::endl;
   std::vector<int> vec(10);
   for (int i = 0; i < 10; i++) {
@@ -51,7 +52,21 @@ void Test2() {
   std::cout << "------------- end test merge sort -------------" << std::endl;
 }
 
-void Test3() {
+void Test_HeapSort() {
+  std::cout << "------------- start test heap sort -------------" << std::endl;
+  std::vector<int> vec(10);
+  for (int i = 0; i < 10; i++) {
+    vec[i] = std::rand() % 100;
+  }
+  std::cout << "before heap sort vec is " << std::endl;
+  Print(vec);
+  lch::HeapSort::Sort(vec, 0, vec.size() - 1);
+  std::cout << "after heap sort vec is " << std::endl;
+  Print(vec);
+  std::cout << "------------- end test heap sort -------------" << std::endl;
+}
+
+void Test() {
   std::cout << "------------- start test  -------------" << std::endl;
   std::cout << "lch::QuickSort::a is " << lch::QuickSort::a << std::endl;
   std::cout << "lch::MergeSort::a is " << lch::MergeSort::a << std::endl;
@@ -67,9 +82,10 @@ int main () {
   std::cout << lch_max(10, 20) << std::endl;
   #endif
 
-  (void)Test1();
-  (void)Test2();
-  (void)Test3();
+  (void)Test_QuickSort();
+  (void)Test_MergeSort();
+  (void)Test_HeapSort();
+  (void)Test();
   
   std::cout << "end lch !" << std::endl;
   return 0;
